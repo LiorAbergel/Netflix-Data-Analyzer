@@ -28,7 +28,7 @@ def validate_inputs(df, time_unit=None, profile_name=None, top_n=10):
         return False
     return True
 
-def format_profile_name(profile_name):
+def format_profile_name(profile_name=None):
     """Formats the profile name for use in plot titles."""
     profile_name = profile_name or 'All Profiles'
     return f'- {profile_name}'
@@ -78,8 +78,8 @@ def plot_duration_by_time_unit(df, time_unit, profile_name=None):
     
     result_df = get_duration_by(df, time_unit, profile_name)
 
-    
     title = f'Total Duration by {time_unit.capitalize()} {format_profile_name(profile_name)}'
+
     plot_bar_chart(result_df[time_unit], result_df['duration'],
                    time_unit.capitalize(), f'Total Duration ({time_unit.capitalize()}s)',
                    title, rotation=0, annotate=False)

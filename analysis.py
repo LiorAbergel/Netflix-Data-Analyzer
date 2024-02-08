@@ -1,6 +1,3 @@
-import pandas as pd
-from preprocessing import custom_weekday_order
-
 def get_duration_by(df, by, profile_name=None):
     """Returns a dataframe with the total duration watched per 'by' parameter"""
 
