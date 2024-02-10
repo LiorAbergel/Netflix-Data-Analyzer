@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 from bidi.algorithm import get_display
 from cycler import cycler
 from analysis import *
+import numpy as np
+import seaborn as sns
 
 VALID_TIME_UNITS = ['hour', 'weekday']
 
@@ -70,7 +72,7 @@ def plot_bar_chart(x, y, xlabel, ylabel, title, rotation=None, annotate=False):
 
     plt.show()
 
-def plot_duration_by_time_unit(df, time_unit, profile_name=None):
+def plot_bar_duration_by_time_unit(df, time_unit, profile_name=None):
     """Plots a bar chart of the total duration watched per time unit (weekday/hour)"""
 
     if not validate_inputs(df, time_unit, profile_name):
@@ -84,7 +86,7 @@ def plot_duration_by_time_unit(df, time_unit, profile_name=None):
                    time_unit.capitalize(), f'Total Duration ({time_unit.capitalize()}s)',
                    title, rotation=0, annotate=False)
     
-def plot_duration_by_title(df, profile_name=None, top_n=10):
+def plot_bar_duration_by_title(df, profile_name=None, top_n=10):
     """Plots a bar chart of the total duration watched per title"""
 
     if not validate_inputs(df, None, profile_name, top_n):
@@ -100,7 +102,7 @@ def plot_duration_by_title(df, profile_name=None, top_n=10):
                    'Title', 'Total Duration (Hours)', title,
                    rotation=45, annotate=False)
 
-def plot_total_duration_by_profile(df):
+def plot_bar_total_duration_by_profile(df):
     """Plots a bar chart of the total duration watched per profile."""
     
     result_df = get_total_duration_by_profile(df)
@@ -115,7 +117,7 @@ def plot_total_duration_by_profile(df):
                    f'(Total Duration for All Profiles: {total_duration_all_profiles:.2f} Hours)',
                    rotation=0, annotate=True)
 
-def plot_duration_freq(df, profile_name=None):
+def plot_bar_duration_freq(df, profile_name=None):
     """Plots a chart of the total duration watched per duration category (short/medium/long)"""
 
     if not validate_inputs(df, None, profile_name):
@@ -128,7 +130,7 @@ def plot_duration_freq(df, profile_name=None):
                    'Duration Category', 'Total Duration (Hours)', title,
                    annotate=False)
 
-def plot_duration_by_country(df, top_n=10, profile_name=None):
+def plot_bar_duration_by_country(df, top_n=10, profile_name=None):
     """Plots a bar chart of the total duration watched per country"""
 
     if not validate_inputs(df, None, profile_name, top_n):
@@ -141,7 +143,7 @@ def plot_duration_by_country(df, top_n=10, profile_name=None):
                    'Country', 'Total Duration (Hours)', title,
                    rotation=0, annotate=True)
     
-def plot_duration_by_device(df, top_n=5, profile_name=None):
+def plot_bar_duration_by_device(df, top_n=5, profile_name=None):
     """Plots a bar chart of the total duration watched per device"""
 
     if not validate_inputs(df, None, profile_name, top_n):
@@ -153,6 +155,59 @@ def plot_duration_by_device(df, top_n=5, profile_name=None):
     plot_bar_chart(result_df['device_type'], result_df['duration'],
                    'Device Type', 'Total Duration (Hours)', title,
                    rotation=90, annotate=False)
+
+def plot_graph_viewing_frequency(df, profile_name=None):
+
+    if not validate_inputs(df, None, profile_name):
+        return  
+
+    # Group data by 'month' and count the number of viewing sessions
+    monthly_data = get_monthly_view_count(df, profile_name)
+
+    # Filter to keep only January data
+    january_data = monthly_data[monthly_data['month'].str.endswith('-01')]
+
+    # Extract year from 'month' column to use as labels
+    january_years = january_data['month'].str[:4]
+
+    # Plot the monthly viewing frequency
+    plt.figure(figsize=(12, 6))
+    plt.plot(monthly_data['month'], monthly_data['count'], linestyle='-', color='skyblue')
+    plt.title('Viewing Frequency')
+    plt.xlabel('Year')
+    plt.ylabel('Number of Viewing Sessions')
+
+    # Set x-axis tick positions and labels for January
+    plt.xticks(january_data['month'], january_years, rotation=45)
+
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+def plot_heatmap_viewing_frequency(df, profile_name=None):
+
+    if not validate_inputs(df, None, profile_name):
+        return  
+
+    # Group data by 'month' and count the number of viewing sessions
+    monthly_data = get_monthly_view_count(df, profile_name)
+
+    # Extract year and month components
+    monthly_data['year'] = monthly_data['month'].str[:4]
+    monthly_data['month'] = monthly_data['month'].str[-2:].astype(int)
+
+    # Pivot the data to create a matrix of viewing frequency by month and year
+    heatmap_data = monthly_data.pivot(index='year', columns='month', values='count')
+
+    # Plot the heatmap using Seaborn
+    plt.figure(figsize=(12, 6))
+    sns.heatmap(heatmap_data, cmap='viridis', annot=True, fmt='.0f', linewidths=0.5)
+    plt.title('Viewing Frequency by Month')
+    plt.xlabel('Month')
+    plt.ylabel('Year')
+    plt.tight_layout()
+    plt.show()
+
 
 
 

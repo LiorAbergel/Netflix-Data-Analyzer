@@ -29,10 +29,22 @@ def get_duration_by_device(df, profile_name=None):
     """Returns a dataframe with the total duration watched per device"""
     return get_duration_by(df, 'device_type', profile_name)
 
-def get_sessions(df, profile_name=None):
-    """Returns a dataframe that contains only the watching sessions found in the data
-    session = entry with start time in proximity of 10 minutes from the previous entry's end time
-    (Data is sorted by start time)"""
+def get_monthly_view_count(df, profile_name=None):
+    """Returns a DataFrame with the number of viewing sessions per month."""
+    
+    filtered_df = df[df['profile_name'] == profile_name] if profile_name else df
+    
+    filtered_df = filtered_df[['start_time']].copy()
+    
+    filtered_df['month'] = filtered_df['start_time'].dt.to_period('M')
+
+    filtered_df['month'] = filtered_df['month'].astype(str)
+    
+    weekly_data = filtered_df.groupby('month').size().reset_index(name='count')
+
+    weekly_data['year'] = weekly_data['month'].str[:4]
+
+    return weekly_data
 
 
 
